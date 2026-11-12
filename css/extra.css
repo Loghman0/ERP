@@ -1,0 +1,11 @@
+@media print {
+  .no-print, #sidebar, #aiChatFab, header.sticky { display: none !important; }
+  body { background: #fff !important; }
+}
+
+/* Utility used by a couple of hand-off chips in redesigned headers */
+.dot-sep::before {
+  content: '·';
+  margin: 0 6px;
+  color: var(--text-faint);
+}

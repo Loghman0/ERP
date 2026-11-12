@@ -1,0 +1,225 @@
+/* ==========================================================================
+   TAILWIND UTILITY → DESIGN TOKEN BRIDGE
+   --------------------------------------------------------------------------
+   The view layer (views/*.js) renders raw Tailwind color utility classes
+   (text-white, text-slate-400, border-white/5, from-emerald-500, ...)
+   inline in template strings. Rather than rewrite thousands of template-
+   string occurrences (high regression risk for a data-driven ERP), this
+   file remaps that fixed utility vocabulary onto the new warm-editorial
+   token system with !important — same technique the previous theme file
+   used for its light mode, now applied as the base layer for BOTH modes,
+   since light is the new default and dark is a first-class second mode.
+   ========================================================================== */
+
+/* ---------- Text ---------- */
+.text-white,
+h1, h2, h3, h4 { color: var(--text-strong) !important; }
+
+.text-slate-200, .text-slate-300 { color: var(--text) !important; }
+.text-slate-400 { color: var(--text-muted) !important; }
+.text-slate-500, .text-slate-600 { color: var(--text-faint) !important; }
+
+.text-emerald-300, .text-emerald-400, .text-emerald-500 { color: var(--accent-text) !important; }
+.text-blue-300, .text-blue-400 { color: var(--azure-700) !important; }
+.text-amber-300, .text-amber-400 { color: var(--gold-600) !important; }
+.text-orange-300, .text-orange-400 { color: var(--terracotta-700) !important; }
+.text-purple-300, .text-purple-400 { color: var(--plum-700) !important; }
+.text-fuchsia-300 { color: var(--plum-700) !important; }
+.text-red-300, .text-red-400, .text-red-500 { color: var(--red-700) !important; }
+
+html.dark-mode .text-emerald-300, html.dark-mode .text-emerald-400, html.dark-mode .text-emerald-500 { color: var(--teal-400) !important; }
+html.dark-mode .text-blue-300, html.dark-mode .text-blue-400 { color: #93c5fd !important; }
+html.dark-mode .text-amber-300, html.dark-mode .text-amber-400 { color: #fbbf24 !important; }
+html.dark-mode .text-orange-300, html.dark-mode .text-orange-400 { color: #fdba74 !important; }
+html.dark-mode .text-purple-300, html.dark-mode .text-purple-400, html.dark-mode .text-fuchsia-300 { color: #d8b4fe !important; }
+html.dark-mode .text-red-300, html.dark-mode .text-red-400, html.dark-mode .text-red-500 { color: #fca5a5 !important; }
+
+.hover\:text-white:hover { color: var(--text-strong) !important; }
+
+/* ---------- Surfaces / borders ---------- */
+.border-white\/5, .border-white\/10, .border-white\/20 { border-color: var(--border) !important; }
+.bg-white\/5, .bg-white\/10, .bg-white\/20, .bg-white\/\[0\.02\], .bg-white\/\[0\.05\] { background: var(--surface-soft) !important; }
+.bg-black\/20, .bg-black\/30, .bg-black\/40 { background: var(--surface-sunken) !important; }
+.hover\:bg-white\/10:hover, .hover\:bg-white\/5:hover, .hover\:bg-white\/\[0\.02\]:hover { background: var(--surface-soft) !important; }
+
+/* Active/inactive pill-tab combo used on dashboard branch switcher */
+.text-white.bg-white\/10.border-white\/20 {
+  background: var(--ink-950) !important;
+  color: var(--paper-50) !important;
+  border-color: var(--ink-950) !important;
+}
+html.dark-mode .text-white.bg-white\/10.border-white\/20 {
+  background: var(--teal-500) !important;
+  color: var(--ink-950) !important;
+  border-color: var(--teal-500) !important;
+}
+
+/* Soft icon chips (bg-COLOR-500/20) used inside branch overview cards */
+.bg-emerald-500\/20 { background: var(--teal-100) !important; }
+.bg-blue-500\/20 { background: var(--azure-100) !important; }
+.bg-amber-500\/20 { background: var(--terracotta-100) !important; }
+.bg-purple-500\/20 { background: var(--plum-100) !important; }
+.bg-red-500\/20 { background: var(--red-100) !important; }
+html.dark-mode .bg-emerald-500\/20 { background: rgba(45,212,191,.18) !important; }
+html.dark-mode .bg-blue-500\/20 { background: rgba(96,165,250,.18) !important; }
+html.dark-mode .bg-amber-500\/20 { background: rgba(251,146,60,.18) !important; }
+html.dark-mode .bg-purple-500\/20 { background: rgba(196,181,253,.18) !important; }
+html.dark-mode .bg-red-500\/20 { background: rgba(248,113,113,.18) !important; }
+
+/* Colored soft borders used on info/callout boxes throughout finance,
+   teacher and settings cards — map every /NN opacity variant to a flat
+   token tint so light + dark both stay legible. */
+.border-emerald-500\/15, .border-emerald-500\/20, .border-emerald-500\/25, .border-emerald-500\/30 { border-color: var(--teal-100) !important; }
+.border-blue-500\/15, .border-blue-500\/20, .border-blue-500\/25, .border-blue-500\/30 { border-color: var(--azure-100) !important; }
+.border-red-500\/15, .border-red-500\/20, .border-red-500\/25, .border-red-500\/30 { border-color: var(--red-100) !important; }
+.border-amber-500\/15, .border-amber-500\/20, .border-amber-500\/25, .border-amber-500\/30 { border-color: var(--terracotta-100) !important; }
+.border-purple-500\/15, .border-purple-500\/20, .border-purple-500\/25, .border-purple-500\/30 { border-color: var(--plum-100) !important; }
+.border-orange-500\/30 { border-color: var(--terracotta-100) !important; }
+
+html.dark-mode .border-emerald-500\/15, html.dark-mode .border-emerald-500\/20, html.dark-mode .border-emerald-500\/25, html.dark-mode .border-emerald-500\/30 { border-color: rgba(45,212,191,.25) !important; }
+html.dark-mode .border-blue-500\/15, html.dark-mode .border-blue-500\/20, html.dark-mode .border-blue-500\/25, html.dark-mode .border-blue-500\/30 { border-color: rgba(96,165,250,.25) !important; }
+html.dark-mode .border-red-500\/15, html.dark-mode .border-red-500\/20, html.dark-mode .border-red-500\/25, html.dark-mode .border-red-500\/30 { border-color: rgba(248,113,113,.25) !important; }
+html.dark-mode .border-amber-500\/15, html.dark-mode .border-amber-500\/20, html.dark-mode .border-amber-500\/25, html.dark-mode .border-amber-500\/30 { border-color: rgba(251,146,60,.25) !important; }
+html.dark-mode .border-purple-500\/15, html.dark-mode .border-purple-500\/20, html.dark-mode .border-purple-500\/25, html.dark-mode .border-purple-500\/30 { border-color: rgba(196,181,253,.25) !important; }
+html.dark-mode .border-orange-500\/30 { border-color: rgba(251,146,60,.25) !important; }
+
+/* Soft tinted backgrounds built with from-X/NN to-X/NN gradients: flatten
+   every combination to the matching semantic tint so stat cards and
+   callouts read as calm flat-color blocks instead of neon glow chips. */
+.from-emerald-500\/15, .from-emerald-500\/5, .from-emerald-600 { --tw-gradient-from: var(--teal-50) !important; }
+.to-emerald-500\/5, .to-emerald-600 { --tw-gradient-to: var(--teal-50) !important; }
+.from-blue-500\/15, .from-blue-500\/5, .from-blue-600, .from-blue-500 { --tw-gradient-from: var(--azure-50) !important; }
+.to-blue-500\/5, .to-blue-600 { --tw-gradient-to: var(--azure-50) !important; }
+.from-red-500\/15, .from-red-500\/5 { --tw-gradient-from: var(--red-50) !important; }
+.to-red-500\/5 { --tw-gradient-to: var(--red-50) !important; }
+.from-amber-500\/15 { --tw-gradient-from: var(--terracotta-50) !important; }
+.to-amber-500\/5 { --tw-gradient-to: var(--terracotta-50) !important; }
+.from-purple-500\/15, .from-purple-600, .from-purple-600\/20 { --tw-gradient-from: var(--plum-50) !important; }
+.to-purple-500\/5, .to-fuchsia-600, .to-fuchsia-600\/20 { --tw-gradient-to: var(--plum-50) !important; }
+.to-cyan-500 { --tw-gradient-to: var(--teal-50) !important; }
+
+html.dark-mode .from-emerald-500\/15, html.dark-mode .from-emerald-500\/5, html.dark-mode .from-emerald-600 { --tw-gradient-from: rgba(45,212,191,.14) !important; }
+html.dark-mode .to-emerald-500\/5, html.dark-mode .to-emerald-600 { --tw-gradient-to: rgba(45,212,191,.05) !important; }
+html.dark-mode .from-blue-500\/15, html.dark-mode .from-blue-500\/5, html.dark-mode .from-blue-600, html.dark-mode .from-blue-500 { --tw-gradient-from: rgba(96,165,250,.14) !important; }
+html.dark-mode .to-blue-500\/5, html.dark-mode .to-blue-600 { --tw-gradient-to: rgba(96,165,250,.05) !important; }
+html.dark-mode .from-red-500\/15, html.dark-mode .from-red-500\/5 { --tw-gradient-from: rgba(248,113,113,.14) !important; }
+html.dark-mode .to-red-500\/5 { --tw-gradient-to: rgba(248,113,113,.05) !important; }
+html.dark-mode .from-amber-500\/15 { --tw-gradient-from: rgba(251,146,60,.14) !important; }
+html.dark-mode .to-amber-500\/5 { --tw-gradient-to: rgba(251,146,60,.05) !important; }
+html.dark-mode .from-purple-500\/15, html.dark-mode .from-purple-600, html.dark-mode .from-purple-600\/20 { --tw-gradient-from: rgba(196,181,253,.14) !important; }
+html.dark-mode .to-purple-500\/5, html.dark-mode .to-fuchsia-600, html.dark-mode .to-fuchsia-600\/20 { --tw-gradient-to: rgba(196,181,253,.05) !important; }
+html.dark-mode .to-cyan-500 { --tw-gradient-to: rgba(45,212,191,.05) !important; }
+
+/* Solid brand-gradient chips (AI badges, avatars, FAB) keep real color —
+   these are small, deliberate accent moments, not full-surface glows. */
+.from-purple-600.to-fuchsia-600,
+.bg-gradient-to-r.from-purple-600.to-fuchsia-600,
+.bg-gradient-to-br.from-purple-600.to-fuchsia-600 {
+  --tw-gradient-from: var(--plum-600) !important;
+  --tw-gradient-to: var(--terracotta-500) !important;
+}
+.from-emerald-500.to-blue-600,
+.bg-gradient-to-br.from-emerald-500.to-blue-600 {
+  --tw-gradient-from: var(--teal-600) !important;
+  --tw-gradient-to: var(--azure-600) !important;
+}
+.from-blue-500.to-emerald-600,
+.bg-gradient-to-br.from-blue-500.to-emerald-600 {
+  --tw-gradient-from: var(--azure-600) !important;
+  --tw-gradient-to: var(--teal-600) !important;
+}
+.from-blue-600.to-cyan-500,
+.bg-gradient-to-r.from-blue-600.to-cyan-500 {
+  --tw-gradient-from: var(--azure-600) !important;
+  --tw-gradient-to: var(--teal-500) !important;
+}
+
+/* Extra soft-tint background utilities used for inline info/warning boxes */
+.bg-amber-500\/5, .bg-amber-500\/10 { background: var(--terracotta-50) !important; }
+.bg-red-500\/5, .bg-red-500\/10 { background: var(--red-50) !important; }
+.text-amber-400\/80 { color: var(--terracotta-700) !important; }
+html.dark-mode .bg-amber-500\/5, html.dark-mode .bg-amber-500\/10 { background: rgba(251,146,60,.10) !important; }
+html.dark-mode .bg-red-500\/5, html.dark-mode .bg-red-500\/10 { background: rgba(248,113,113,.10) !important; }
+html.dark-mode .text-amber-400\/80 { color: #fdba74 !important; }
+
+/* Custom settings toggle switch (replaces raw peer-checked Tailwind combo
+   so it tracks the token palette in both modes) */
+.settings-switch {
+  width: 44px; height: 26px; border-radius: 999px;
+  background: var(--surface-sunken);
+  border: 1px solid var(--border-strong);
+  position: relative;
+  transition: background .2s;
+}
+.settings-switch::after {
+  content: '';
+  position: absolute; top: 2px; left: 2px;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0,0,0,.25);
+  transition: transform .2s;
+}
+input:checked + .settings-switch { background: var(--ink-950); border-color: var(--ink-950); }
+input:checked + .settings-switch::after { transform: translateX(18px); }
+html.dark-mode input:checked + .settings-switch { background: var(--teal-500); border-color: var(--teal-500); }
+
+/* Solid -500 fills used for progress bars / dots (attendance summary, etc) */
+.bg-emerald-500 { background-color: var(--teal-600) !important; }
+.bg-amber-500 { background-color: var(--gold-500) !important; }
+.bg-red-500 { background-color: var(--red-600) !important; }
+.bg-blue-500 { background-color: var(--azure-600) !important; }
+.bg-purple-500 { background-color: var(--plum-600) !important; }
+html.dark-mode .bg-emerald-500 { background-color: var(--teal-400) !important; }
+
+/* ---------- Forms ---------- */
+input.input-style::placeholder, textarea.input-style::placeholder { color: var(--text-faint) !important; }
+
+/* ---------- Flatpickr ---------- */
+.flatpickr-calendar {
+  background: var(--surface) !important;
+  color: var(--text-strong) !important;
+  box-shadow: var(--shadow-lg) !important;
+  border: 1px solid var(--border) !important;
+}
+.flatpickr-day { color: var(--text) !important; }
+.flatpickr-day.flatpickr-disabled { color: var(--text-faint) !important; }
+.flatpickr-day.selected, .flatpickr-day.selected:hover {
+  background: var(--accent) !important; border-color: var(--accent) !important; color: #fff !important;
+}
+.flatpickr-day.today { border-color: var(--accent) !important; }
+.flatpickr-months .flatpickr-month,
+.flatpickr-weekdays, span.flatpickr-weekday {
+  background: var(--surface) !important; color: var(--text-muted) !important; fill: var(--text-muted) !important;
+}
+.flatpickr-current-month input.cur-year, .flatpickr-monthDropdown-months { color: var(--text-strong) !important; }
+.flatpickr-months .flatpickr-prev-month, .flatpickr-months .flatpickr-next-month { fill: var(--text-muted) !important; }
+
+/* ---------- AI chat + AI result cards ---------- */
+.ai-surface { background: var(--surface); border: 1px solid var(--border); color: var(--text); }
+.ai-msg-ai { background: var(--surface-soft); border: 1px solid var(--border); color: var(--text); }
+.ai-msg-user { background: var(--plum-600); color: #ffffff; }
+
+.ai-md { color: var(--text); }
+.ai-md strong, .ai-md b { color: var(--text-strong); }
+.ai-md h1 { color: var(--text-strong); }
+.ai-md h2 { color: var(--plum-700); }
+.ai-md h3 { color: var(--teal-700); }
+html.dark-mode .ai-md h2 { color: #d8b4fe; }
+html.dark-mode .ai-md h3 { color: var(--teal-400); }
+.ai-md code { background: var(--accent-soft); color: var(--accent-text); }
+.ai-md a { color: var(--azure-600); text-decoration: underline; text-underline-offset: 2px; }
+
+.ai-chip {
+  background: var(--plum-50);
+  border: 1px solid var(--plum-100);
+  color: var(--plum-700);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform .15s, background .2s;
+}
+.ai-chip:hover { transform: translateY(-1px); background: var(--plum-100); }
+html.dark-mode .ai-chip { background: rgba(196,181,253,.12); border-color: rgba(196,181,253,.25); color: #d8b4fe; }
+html.dark-mode .ai-chip:hover { background: rgba(196,181,253,.2); }

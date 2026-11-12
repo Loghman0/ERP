@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="az">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title id="pageTitle">Məram | Tədris Mərkəzi ERP</title>
+  <meta name="description"
+    content="Məram Tədris Mərkəzi üçün peşəkar idarəetmə sistemi - şagird, müəllim, maliyyə, yay kursu və imtahan idarəetməsi." />
+  <meta property="og:title" content="Məram Tədris Mərkəzi | ERP" />
+  <meta property="og:description" content="Şagird, kadr, cədvəl, davamiyyət və maliyyə idarəetməsi — bir yerdə." />
+  <meta property="og:image" content="assets/logo-full.png" />
+  <meta property="og:type" content="website" />
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png" />
+  <link rel="shortcut icon" href="assets/favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/icon-192.png" />
+  <link rel="icon" type="image/png" sizes="512x512" href="assets/icon-512.png" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#0f766e" />
+
+  <script src="js/theme-init.js"></script>
+
+  <!-- Tailwind
+       PRODUCTION NOTE: this is the Tailwind CDN JIT-compiler script.
+       Tailwind's own docs advise against this for production (it ships
+       the whole compiler + recompiles on every load, and — because it
+       generates CSS dynamically per page — it cannot carry a
+       Subresource Integrity hash the way the other pinned scripts
+       below do). Kept as-is here to avoid introducing a build step in
+       this pass; see README "Removing the Tailwind CDN script" for the
+       migration path (Tailwind CLI producing a static css/tailwind.css). -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- FontAwesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <!-- Flatpickr (base theme only — flatpickr surfaces are re-skinned in theme-light.css via tokens) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" crossorigin="anonymous"
+    referrerpolicy="no-referrer" />
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/az.js" crossorigin="anonymous"
+    referrerpolicy="no-referrer"></script>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" crossorigin="anonymous"
+    referrerpolicy="no-referrer"></script>
+
+  <!-- Export libs (SheetJS + jsPDF + autotable) -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js" crossorigin="anonymous"
+    referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" crossorigin="anonymous"
+    referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+  <!-- ===== Styles (split) ===== -->
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/theme-light.css" />
+  <link rel="stylesheet" href="css/extra.css" />
+
+  <!-- Firebase v9 compat -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js" crossorigin="anonymous"
+    referrerpolicy="no-referrer"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js" crossorigin="anonymous"
+    referrerpolicy="no-referrer"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js" crossorigin="anonymous"
+    referrerpolicy="no-referrer"></script>
+  <!-- Needed to call the Cloud Functions in functions/src/ (geminiProxy,
+       setUserActive, deleteUserAccount) via firebase.functions().httpsCallable(). -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-functions-compat.js" crossorigin="anonymous"
+    referrerpolicy="no-referrer"></script>
+  <!-- NOTE: integrity="sha384-..." hashes are intentionally not hardcoded
+       above — this sandboxed build environment cannot reach these CDN
+       hosts to compute them safely (a wrong hash silently BREAKS the
+       script instead of leaving it unprotected). Run
+       `node scripts/add-sri-hashes.mjs` from a machine with normal
+       internet access to fetch and inject real hashes onto every tag
+       above; `node scripts/add-sri-hashes.mjs --check` verifies them
+       in CI without modifying the file. See that script's header
+       comment for details. -->
+
+  <!-- Theme is now applied via js/theme-init.js, loaded early near the
+       top of <head> (see above) instead of here — moved out of an
+       inline <script> block specifically because this page's CSP
+       (script-src with no 'unsafe-inline') silently blocks inline
+       script execution; see that CSP's own comment for the full story
+       of what this broke before it was caught. -->
+</head>
+
+<body>
+
+  <!-- ============== TOAST ============== -->
+  <div id="toastContainer"></div>
+
+  <!-- ============== LOGIN ============== -->
+  <div id="loginScreen" class="min-h-screen flex items-stretch justify-center" style="background:var(--bg);">
+    <div class="hidden lg:flex flex-col justify-between w-[42%] p-12 relative overflow-hidden"
+      style="background:var(--ink-950);">
+      <div class="absolute inset-0 opacity-[0.05]"
+        style="background-image:radial-gradient(circle at 1px 1px, #fff 1px, transparent 0);background-size:28px 28px;">
+      </div>
+      <div class="relative z-10">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 p-1.5" style="background:#fff;">
+            <img src="assets/logo-icon.png" alt="Məram" class="w-full h-full object-contain"
+              onerror="this.closest('div').innerHTML='M';this.closest('div').className='w-10 h-10 rounded-xl flex items-center justify-center text-lg font-bold font-head';this.closest('div').style.cssText='background:var(--teal-500);color:var(--ink-950);'" />
+          </div>
+          <span class="font-head text-white font-semibold text-lg tracking-tight">Məram</span>
+        </div>
+      </div>
+      <div class="relative z-10">
+        <p class="font-head text-white text-[28px] leading-[1.25] font-medium max-w-sm">Tədris mərkəzinizin bütün
+          idarəçiliyi — bir yerdə, sadə və dəqiq.</p>
+        <p class="text-sm mt-4 max-w-sm" style="color:var(--ink-300);">Şagird, kadr, cədvəl, davamiyyət və maliyyə —
+          hər iki filial üçün tək ekrandan.</p>
+      </div>
+      <p class="relative z-10 text-[11px]" style="color:var(--ink-400);">© 2025 Məram Tədris Mərkəzi</p>
+    </div>
+
+    <div class="flex-1 flex items-center justify-center p-6 sm:p-10">
+      <div class="w-full max-w-sm slide-up">
+        <div class="lg:hidden flex items-center gap-3 mb-10">
+          <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 p-1.5"
+            style="background:var(--surface-soft);">
+            <img src="assets/logo-icon.png" alt="Məram" class="w-full h-full object-contain"
+              onerror="this.closest('div').innerHTML='M';this.closest('div').className='w-10 h-10 rounded-xl flex items-center justify-center text-lg font-bold font-head';this.closest('div').style.cssText='background:var(--ink-950);color:var(--teal-400);'" />
+          </div>
+          <span class="font-head font-semibold text-lg tracking-tight" style="color:var(--text-strong);">Məram</span>
+        </div>
+        <h1 class="font-head text-2xl font-semibold" style="color:var(--text-strong);">Xoş gəlmisiniz</h1>
+        <p class="text-sm mt-1.5 mb-8" style="color:var(--text-muted);">Davam etmək üçün hesabınıza daxil olun</p>
+        <form id="loginForm" class="space-y-4">
+          <div>
+            <label class="eyebrow mb-2 block">Email</label>
+            <input id="loginEmail" type="email" required class="input-style" placeholder="nümunə@meram.az" />
+          </div>
+          <div>
+            <label class="eyebrow mb-2 block">Şifrə</label>
+            <input id="loginPassword" type="password" required class="input-style" placeholder="••••••••" />
+          </div>
+          <div id="loginError" class="text-xs font-semibold hidden p-3 rounded-[10px]"
+            style="background:var(--red-50);color:var(--red-700);border:1px solid var(--red-100);"></div>
+          <button type="submit" id="loginBtn" class="w-full btn-primary py-3.5 rounded-[12px] mt-2">
+            <i class="fa-solid fa-arrow-right-to-bracket mr-2"></i> Daxil Ol
+          </button>
+        </form>
+        <p class="text-center text-[11px] mt-8 lg:hidden" style="color:var(--text-faint);">© 2025 Məram Tədris
+          Mərkəzi</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============== APP ============== -->
+  <div id="app" class="hidden min-h-screen flex">
+
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar(false)"></div>
+
+    <!-- SIDEBAR -->
+    <aside id="sidebar" class="w-[264px] shrink-0 glass border-r p-4 flex flex-col" style="border-color:var(--border);">
+      <div class="flex items-center gap-3 mb-7 px-2 pt-1">
+        <div id="tenantLogoLetter"
+          class="w-9 h-9 rounded-[10px] flex items-center justify-center text-base font-bold font-head shrink-0"
+          style="background:var(--ink-950);color:var(--teal-400);display:none;">M</div>
+        <img id="tenantLogoImg" src="assets/logo-icon.png" alt="Məram logo"
+          class="w-9 h-9 rounded-[10px] object-contain shrink-0" style="background:var(--surface-soft);padding:3px;"
+          onerror="this.style.display='none';document.getElementById('tenantLogoLetter').style.display='flex';" />
+        <div>
+          <h1 id="tenantLogoText" class="font-head text-[15px] font-semibold tracking-tight leading-none"
+            style="color:var(--text-strong);">Məram</h1>
+          <p id="tenantLogoSubtext" class="eyebrow mt-1" style="font-size:8.5px;">Tədris Mərkəzi</p>
+        </div>
+      </div>
+
+      <nav class="flex-1 space-y-0.5 overflow-y-auto">
+        <div class="nav-item active" data-view="dashboard"><i class="fa-solid fa-gauge"></i> Dashboard</div>
+        <div class="nav-item" data-view="students"><i class="fa-solid fa-graduation-cap"></i> Şagirdlər</div>
+        <div class="nav-item" data-view="attendance" data-perm="attendance"><i class="fa-solid fa-clipboard-check"></i>
+          Davamiyyət</div>
+        <div class="nav-item" data-view="schedule" data-perm="schedule"><i class="fa-solid fa-calendar-days"></i> Cədvəl
+        </div>
+        <div class="nav-item" data-view="teachers" data-perm="teachers"><i class="fa-solid fa-users"></i>
+          Kadrlar</div>
+        <div class="nav-item" data-view="finance" data-perm="finance"><i class="fa-solid fa-wallet"></i> Maliyyə &
+          Büdcə</div>
+        <div class="nav-item" data-view="info"><i class="fa-solid fa-circle-info"></i> Məlumat</div>
+        <div class="nav-item" data-view="settings"><i class="fa-solid fa-gear"></i> Parametrlər</div>
+        <div class="nav-item" data-view="users" data-perm="users">
+          <i class="fa-solid fa-users-gear"></i> İstifadəçilər
+        </div>
+        <div class="pt-4 mt-3 border-t nav-ai-section" data-perm="ai" data-admin-only="1"
+          style="border-color:var(--border);">
+          <p class="eyebrow px-3 mb-1.5" style="color:var(--plum-600);"><i
+              class="fa-solid fa-wand-magic-sparkles mr-1.5"></i>AI Modulu</p>
+        </div>
+        <div class="nav-item nav-ai" data-view="ai-finance" data-perm="ai" data-admin-only="1"><i
+            class="fa-solid fa-chart-line"></i> AI Maliyyə Analizi</div>
+        <div class="nav-item nav-ai" data-view="ai-students" data-perm="ai" data-admin-only="1"><i
+            class="fa-solid fa-user-graduate"></i> AI Şagird Hesabatı</div>
+        <div class="nav-item nav-ai" data-view="ai-forecast" data-perm="ai" data-admin-only="1"><i
+            class="fa-solid fa-chart-simple"></i> AI Proqnoz</div>
+      </nav>
+
+      <div class="border-t pt-3 mt-3" style="border-color:var(--border);">
+        <div class="flex items-center gap-3 px-2 mb-2.5">
+          <div class="w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm font-head shrink-0"
+            style="background:var(--teal-50);color:var(--teal-700);" id="userAvatar">U</div>
+          <div class="flex-1 min-w-0">
+            <p class="text-xs font-semibold truncate" style="color:var(--text-strong);" id="userEmail">user@meram.az</p>
+            <span class="badge badge-emerald mt-1" id="userRoleBadge">ROLE</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-1.5 px-1">
+          <button onclick="toggleColorScheme()" id="colorSchemeToggle" title="Tema"
+            class="w-9 h-9 rounded-[10px] flex items-center justify-center transition hover:bg-[var(--surface-soft)]"
+            style="color:var(--text-muted);"><i class="fa-solid fa-moon text-sm"></i></button>
+          <button onclick="logout()" class="flex-1 btn-ghost justify-start" style="color:var(--red-700);">
+            <i class="fa-solid fa-right-from-bracket"></i> Çıxış
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="flex-1 min-w-0">
+      <header class="sticky top-0 z-40 glass border-b px-5 sm:px-8 py-3.5 flex items-center justify-between gap-3"
+        style="border-color:var(--border);">
+        <div class="flex items-center gap-3">
+          <button class="lg:hidden text-xl w-9 h-9 flex items-center justify-center rounded-[10px]"
+            style="color:var(--text-strong);" onclick="toggleSidebar(true)"><i class="fa-solid fa-bars"></i></button>
+          <div>
+            <h2 id="viewTitle" class="font-head text-lg sm:text-xl font-semibold tracking-tight"
+              style="color:var(--text-strong);">Dashboard</h2>
+            <p class="eyebrow" id="viewSubtitle">Ümumi Baxış</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <div id="branchSwitcher" class="hidden">
+            <select id="branchFilter" class="input-style py-2 text-xs" onchange="onBranchFilterChange()">
+              <option value="all">Bütün Filiallar</option>
+              <option value="sheher">Şəhər Filialı</option>
+              <option value="goynuk">Göynük Filialı</option>
+            </select>
+          </div>
+        </div>
+      </header>
+
+      <div class="p-5 sm:p-8 max-w-[1600px] mx-auto">
+        <div id="view-dashboard" class="view"></div>
+        <div id="view-students" class="view hidden"></div>
+        <div id="view-attendance" class="view hidden"></div>
+        <div id="view-schedule" class="view hidden"></div>
+        <div id="view-teachers" class="view hidden"></div>
+        <div id="view-finance" class="view hidden"></div>
+        <div id="view-info" class="view hidden"></div>
+        <div id="view-settings" class="view hidden"></div>
+        <div id="view-users" class="view hidden"></div>
+        <div id="view-ai-finance" class="view hidden"></div>
+        <div id="view-ai-students" class="view hidden"></div>
+        <div id="view-ai-forecast" class="view hidden"></div>
+      </div>
+    </main>
+  </div>
+
+  <!-- ============== STUDENT MODAL ============== -->
+  <div id="studentModal" class="modal-bg" aria-labelledby="studentModalTitle">
+    <div class="glass rounded-[28px] p-6 sm:p-8 w-full max-w-3xl max-h-[92vh] overflow-y-auto shadow-2xl">
+      <div class="flex items-center justify-between mb-6 pb-4 border-b border-white/5">
+        <div class="flex items-center gap-3">
+          <h3 id="studentModalTitle" class="text-xl font-black italic uppercase text-white">Yeni Şagird</h3>
+          <span id="studentModalEnrollmentBadge" class="badge badge-emerald">TƏDRİS İLİ</span>
+        </div>
+        <button onclick="closeModal('studentModal')"
+          class="text-slate-500 hover:text-white text-xl w-9 h-9 flex items-center justify-center rounded-full hover:bg-white/10"><i
+            class="fa-solid fa-xmark"></i></button>
+      </div>
+      <!-- Wizard progress -->
+      <div class="wizard-progress">
+        <div id="wizDot1" class="wizard-step-dot active">1</div>
+        <span class="wizard-step-label">Şəxsi</span>
+        <div class="wizard-step-bar">
+          <div id="wizBar"></div>
+        </div>
+        <span class="wizard-step-label">Fənlər</span>
+        <div id="wizDot2" class="wizard-step-dot">2</div>
+      </div>
+      <form id="studentForm" class="space-y-4">
+        <input type="hidden" id="sId" />
+        <input type="hidden" id="sEnrollmentType" value="regular" />
+        <!-- ===== STEP 1: Şəxsi məlumatlar ===== -->
+        <div id="wizStep1" class="space-y-4">
+          <p class="text-[10px] font-black uppercase tracking-widest text-emerald-400"><i
+              class="fa-solid fa-user mr-2"></i>Addım 1 / 2 — Şəxsi məlumatlar</p>
+          <div class="grid grid-cols-2 gap-3">
+            <input type="text" id="sName" class="input-style" placeholder="Ad *" required />
+            <input type="text" id="sSurname" class="input-style" placeholder="Soyad *" required />
+          </div>
+          <div class="grid grid-cols-3 gap-3">
+            <input type="text" id="sParent" class="input-style col-span-2" placeholder="Valideyn Adı" />
+            <select id="sClass" class="input-style" required onchange="handleStudentClassChange()">
+              <option value="">Sinif / Kateqoriya *</option>
+              <optgroup label="Məktəb sinifləri">
+                <option value="1">1-ci sinif</option>
+                <option value="2">2-ci sinif</option>
+                <option value="3">3-cü sinif</option>
+                <option value="4">4-cü sinif</option>
+                <option value="5">5-ci sinif</option>
+                <option value="6">6-cı sinif</option>
+                <option value="7">7-ci sinif</option>
+                <option value="8">8-ci sinif</option>
+                <option value="9">9-cu sinif</option>
+                <option value="10">10-cu sinif</option>
+                <option value="11">11-ci sinif</option>
+              </optgroup>
+              <optgroup label="Digər kateqoriyalar">
+                <option value="abituriyent">Məzun / Abituriyent</option>
+                <option value="universitet">Universitet tələbəsi</option>
+                <option value="texnikum">Texnikum tələbəsi</option>
+                <option value="pese">Peşə məktəbi şagirdi</option>
+                <option value="boyuk">Böyük (Vətəndaş)</option>
+              </optgroup>
+            </select>
+          </div>
+          <div id="sSchoolWrap" class="hidden">
+            <input type="text" id="sSchool" class="input-style" placeholder="Oxuduğu müəssisə adını qeyd edin *" />
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <input type="tel" id="sPhone1" class="input-style" placeholder="Əlaqə Nömrəsi 1" />
+            <input type="tel" id="sPhone2" class="input-style" placeholder="Əlaqə Nömrəsi 2" />
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <select id="sBranch" class="input-style" required onchange="refreshSubjectRowTeachers()">
+              <option value="sheher">Şəhər Filialı</option>
+              <option value="goynuk">Göynük Filialı</option>
+            </select>
+
+            <input type="text" id="sNote" class="input-style border-orange-500/30 placeholder-orange-200/40"
+              placeholder="Qeyd (məs: Şəhid ailəsi)" />
+          </div>
+
+        </div><!-- /Step 1 -->
+
+        <!-- ===== STEP 2: Fənlər ===== -->
+        <div id="wizStep2" class="space-y-4 hidden">
+          <p class="text-[10px] font-black uppercase tracking-widest text-emerald-400"><i
+              class="fa-solid fa-book mr-2"></i>Addım 2 / 2 — Fənlər və müəllim</p>
+          <div class="border-t border-white/5 pt-4">
+            <div class="flex items-center justify-between mb-3">
+              <p class="text-[10px] font-black uppercase tracking-widest text-slate-400"><i
+                  class="fa-solid fa-book mr-2 text-emerald-400"></i>Fənlər (müəllim məcburi)</p>
+              <button type="button" onclick="addSubjectRow()" class="btn-primary py-2 px-3 text-xs"><i
+                  class="fa-solid fa-plus mr-1"></i>Fənn əlavə et</button>
+            </div>
+            <div id="subjectRowsContainer" class="space-y-3"></div>
+          </div>
+        </div>
+
+        <!-- Wizard navigation -->
+        <div class="flex flex-col sm:flex-row gap-3 pt-4 border-t border-white/5">
+          <button type="button" id="wizBackBtn" onclick="wizardGoto(1)" class="btn-ghost py-3 px-5 hidden"><i
+              class="fa-solid fa-arrow-left mr-2"></i>Geri</button>
+          <button type="button" id="wizNextBtn" onclick="wizardNext()"
+            class="flex-1 btn-primary py-3 rounded-2xl">İrəli<i class="fa-solid fa-arrow-right ml-2"></i></button>
+          <button type="submit" id="wizSubmitBtn" class="flex-1 btn-primary py-3 rounded-2xl hidden"><i
+              class="fa-solid fa-check mr-2"></i>Yadda Saxla</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============== STUDENT PROFILE MODAL ============== -->
+  <div id="studentProfileModal" class="modal-bg" style="z-index:150;" aria-labelledby="profileName">
+    <div class="glass rounded-[28px] w-full max-w-3xl max-h-[92vh] overflow-y-auto shadow-2xl"
+      style="background:var(--surface);border:1px solid var(--border);">
+      <div id="profileHeader" class="relative p-6 sm:p-8 pb-0">
+        <button onclick="closeModal('studentProfileModal')"
+          class="absolute top-5 right-5 text-slate-500 hover:text-white text-xl w-9 h-9 flex items-center justify-center rounded-full hover:bg-white/10 z-10"><i
+            class="fa-solid fa-xmark"></i></button>
+        <div class="flex items-start gap-5">
+          <div id="profileAvatar"
+            class="w-20 h-20 rounded-3xl bg-gradient-to-br from-emerald-500 to-blue-600 flex items-center justify-center text-3xl font-black text-white shrink-0">
+            A</div>
+          <div class="flex-1 min-w-0 pt-1">
+            <h2 id="profileName" class="text-2xl font-black text-white">Ad Soyad</h2>
+            <div class="flex flex-wrap gap-2 mt-2" id="profileBadges"></div>
+            <p id="profileParent" class="text-xs text-slate-500 mt-2"></p>
+            <p id="profileSchool" class="text-xs text-slate-400 mt-1 font-medium"></p>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-5 pb-5 border-b border-white/5">
+          <div class="text-center p-3 rounded-2xl" style="background:var(--teal-50);border:1px solid var(--teal-100)">
+            <p class="text-[10px] uppercase text-slate-500 font-bold">Sinif</p>
+            <p id="profileClass" class="text-xl font-black text-emerald-400 mt-1">-</p>
+          </div>
+          <div class="text-center p-3 rounded-2xl" style="background:var(--azure-50);border:1px solid var(--azure-100)">
+            <p class="text-[10px] uppercase text-slate-500 font-bold">Filial</p>
+            <p id="profileBranch" class="text-sm font-black text-blue-400 mt-1">-</p>
+          </div>
+          <div class="text-center p-3 rounded-2xl" style="background:var(--gold-50);border:1px solid var(--gold-100)">
+            <p class="text-[10px] uppercase text-slate-500 font-bold">Telefon 1</p>
+            <p id="profilePhone1" class="text-xs font-black text-amber-400 mt-1 break-all">-</p>
+          </div>
+          <div class="text-center p-3 rounded-2xl" style="background:var(--plum-50);border:1px solid var(--plum-100)">
+            <p class="text-[10px] uppercase text-slate-500 font-bold">Telefon 2</p>
+            <p id="profilePhone2" class="text-xs font-black text-purple-400 mt-1 break-all">-</p>
+          </div>
+        </div>
+        <!-- Profile tabs -->
+        <div class="flex gap-6 border-b border-white/5 px-1 pt-3">
+          <button class="tab-btn active" data-ptab="subjects" onclick="setProfileTab('subjects')"><i
+              class="fa-solid fa-book-open mr-2"></i>Fənlər</button>
+          <button class="tab-btn" data-ptab="exams" onclick="setProfileTab('exams')"><i
+              class="fa-solid fa-clipboard-check mr-2"></i>İmtahanlar</button>
+          <button class="tab-btn" data-ptab="payments" onclick="setProfileTab('payments')"><i
+              class="fa-solid fa-receipt mr-2"></i>Ödəniş tarixçəsi</button>
+        </div>
+      </div>
+
+      <div class="p-6 sm:p-8 pt-5">
+        <div id="profileTabSubjects">
+          <div id="profileSubjectsList" class="space-y-3"></div>
+          <div id="profileNote" class="hidden mt-4 p-3 rounded-2xl text-xs text-orange-300 font-bold"
+            style="background:rgba(234,88,12,0.08);border:1px solid rgba(234,88,12,0.2);"><i
+              class="fa-solid fa-note-sticky mr-2"></i><span id="profileNoteText"></span></div>
+          <div id="profileDebtSummary" class="mt-4"></div>
+        </div>
+        <div id="profileTabExams" class="hidden">
+          <div class="flex items-center justify-between mb-4">
+            <p class="text-[10px] font-black uppercase tracking-widest text-slate-400"><i
+                class="fa-solid fa-chart-line mr-2 text-purple-400"></i>Sınaq imtahanları</p>
+            <div class="flex gap-2">
+              <button onclick="printExamResults()" class="btn-ghost text-amber-400 py-2 px-3 text-xs"><i
+                  class="fa-solid fa-print mr-1"></i>Çap</button>
+              <button onclick="openExamModal()" class="btn-primary py-2 px-3 text-xs"><i
+                  class="fa-solid fa-plus mr-1"></i>Yeni nəticə</button>
+            </div>
+          </div>
+          <div style="height:220px" class="mb-4 glass-soft rounded-2xl p-3"><canvas id="examTrendChart"></canvas></div>
+          <div id="examResultsList" class="space-y-3"></div>
+        </div>
+        <div id="profileTabPayments" class="hidden">
+          <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3"><i
+              class="fa-solid fa-money-check-dollar mr-2 text-emerald-400"></i>Bütün fənlər üzrə ödəniş statusu</p>
+          <div id="profilePaymentsList" class="space-y-3"></div>
+        </div>
+        <div class="flex flex-col sm:flex-row gap-3 mt-6 pt-5 border-t border-white/5">
+          <button id="profileEditBtn" class="flex-1 btn-blue py-3"><i class="fa-solid fa-pen mr-2"></i>Redaktə
+            Et</button>
+          <button id="profileAiBtn" onclick="aiAnalyzeStudent()"
+            class="flex-1 py-3 rounded-2xl font-black text-white bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:opacity-90 transition"><i
+              class="fa-solid fa-wand-magic-sparkles mr-2"></i>AI Təhlil Et</button>
+        </div>
+        <div id="profileAiResult" class="hidden mt-4 p-4 rounded-2xl glass-soft border border-purple-500/30"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============== EXAM RESULT MODAL ============== -->
+  <div id="examModal" class="modal-bg" style="z-index:160;" aria-labelledby="examModalTitle">
+    <div class="glass rounded-[28px] p-6 sm:p-8 w-full max-w-2xl max-h-[92vh] overflow-y-auto shadow-2xl">
+      <div class="flex items-center justify-between mb-6 pb-4 border-b border-white/5">
+        <h3 id="examModalTitle" class="text-xl font-black italic uppercase text-white">Yeni İmtahan Nəticəsi</h3>
+        <button onclick="closeModal('examModal')"
+          class="text-slate-500 hover:text-white text-xl w-9 h-9 flex items-center justify-center rounded-full hover:bg-white/10"><i
+            class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form id="examForm" class="space-y-4">
+        <input type="hidden" id="exId" />
+        <input type="hidden" id="exStudentId" />
+        <div class="grid grid-cols-2 gap-3">
+          <input type="text" id="exDate" class="input-style" placeholder="Tarix *" required />
+          <input type="text" id="exName" class="input-style" placeholder="İmtahan adı *" required />
+        </div>
+        <div class="grid grid-cols-3 gap-3">
+          <input type="number" id="exTotalScore" class="input-style" placeholder="Ümumi bal" min="0" step="0.01" />
+          <input type="number" id="exTotalMax" class="input-style" placeholder="Maksimum" min="0" step="0.01" />
+          <input type="text" id="exRank" class="input-style" placeholder="Yer / Reytinq (ops.)" />
+        </div>
+        <div class="border-t border-white/5 pt-4">
+          <div class="flex items-center justify-between mb-3">
+            <p class="text-[10px] font-black uppercase tracking-widest text-slate-400"><i
+                class="fa-solid fa-book mr-2 text-purple-400"></i>Fənlər üzrə bal</p>
+            <button type="button" onclick="addExamSubjectRow()" class="btn-primary py-2 px-3 text-xs"><i
+                class="fa-solid fa-plus mr-1"></i>Fənn əlavə et</button>
+          </div>
+          <div id="examSubjectRows" class="space-y-2"></div>
+        </div>
+        <input type="text" id="exNote" class="input-style" placeholder="Qeyd" />
+        <button type="submit" class="w-full btn-primary py-4 rounded-2xl"><i class="fa-solid fa-check mr-2"></i>Yadda
+          Saxla</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============== TEACHER MODAL ============== -->
+  <div id="teacherModal" class="modal-bg" aria-labelledby="teacherModalTitle">
+    <div class="glass rounded-[28px] p-6 sm:p-8 w-full max-w-lg max-h-[92vh] overflow-y-auto shadow-2xl">
+      <div class="flex items-center justify-between mb-6 pb-4 border-b border-white/5">
+        <h3 id="teacherModalTitle" class="text-xl font-black italic uppercase text-white">Yeni Kadr</h3>
+        <button onclick="closeModal('teacherModal')"
+          class="text-slate-500 hover:text-white text-xl w-9 h-9 flex items-center justify-center rounded-full hover:bg-white/10"><i
+            class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form id="teacherForm" class="space-y-4">
+        <input type="hidden" id="tId" />
+        <input type="text" id="tName" class="input-style" placeholder="Ad Soyad *" required />
+        <input type="tel" id="tPhone" class="input-style" placeholder="Telefon" />
+        <div>
+          <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Vəzifə *</p>
+          <select id="tStaffRole" class="input-style" required onchange="onStaffRoleChange()">
+            <option value="teacher">Müəllim</option>
+            <option value="reception">Reception</option>
+            <option value="manager">Menecer</option>
+            <option value="admin">Administrator</option>
+            <option value="janitor">Xadimə</option>
+            <option value="other">Digər işçi</option>
+          </select>
+        </div>
+        <div class="grid grid-cols-2 gap-3" id="tTeacherFieldsWrap">
+          <select id="tSubject" class="input-style">
+            <option value="">Fənn *</option>
+          </select>
+          <select id="tBranch" class="input-style" required>
+            <option value="sheher">Şəhər Filialı</option>
+            <option value="goynuk">Göynük Filialı</option>
+          </select>
+        </div>
+        <div id="tBranchOnlyWrap" class="hidden">
+          <select id="tBranchOnly" class="input-style" required>
+            <option value="sheher">Şəhər Filialı</option>
+            <option value="goynuk">Göynük Filialı</option>
+          </select>
+        </div>
+        <div id="tNonTeacherWrap" class="hidden">
+          <input type="number" id="tFixedSalary" class="input-style" placeholder="Sabit aylıq maaş (AZN)" min="0" />
+          <p class="text-[10px] text-slate-500 mt-2"><i class="fa-solid fa-info-circle mr-1"></i>Bu məbləğ hər ay
+            avtomatik olaraq xərclərə (Əməkhaqqı) düşür — əl ilə qeyd etməyə ehtiyac yoxdur.</p>
+        </div>
+        <div id="tSalaryBlockWrap">
+          <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Maaş tipi *</p>
+          <div class="chip-group" id="tSalaryTypeChips">
+            <div class="chip active" data-value="fixed" onclick="setSalaryType('fixed')"><i
+                class="fa-solid fa-calendar-check mr-1"></i>Sabit aylıq</div>
+            <div class="chip" data-value="hourly" onclick="setSalaryType('hourly')"><i
+                class="fa-solid fa-clock mr-1"></i>Saatlıq</div>
+            <div class="chip" data-value="revenue_share" onclick="setSalaryType('revenue_share')"><i
+                class="fa-solid fa-percent mr-1"></i>Şagirddən %</div>
+          </div>
+          <input type="hidden" id="tSalaryType" value="fixed" />
+          <div id="tFixedWrap" class="mt-3">
+            <input type="number" id="tMonthlySalary" class="input-style" placeholder="Aylıq Maaş (AZN)" min="0" />
+          </div>
+          <div id="tHourlyWrap" class="hidden mt-3">
+            <input type="number" id="tHourlyRate" class="input-style" placeholder="Saat başı tarif (AZN/saat)" min="0"
+              step="0.01" />
+            <p class="text-[10px] text-slate-500 mt-2"><i class="fa-solid fa-info-circle mr-1"></i>Hər ay üçün işlənən
+              saatları müəllim kartından "Saatları idarə et" düyməsi ilə qeyd edin.</p>
+          </div>
+          <div id="tShareWrap" class="hidden mt-3">
+            <div class="flex gap-3 items-center">
+              <input type="number" id="tTeacherSharePct" class="input-style" placeholder="Müəllim payı (%)" min="0"
+                max="100" value="50" />
+              <span class="text-2xl font-black text-emerald-400">%</span>
+            </div>
+            <p class="text-[10px] text-slate-500 mt-2"><i class="fa-solid fa-info-circle mr-1"></i>Default 50% —
+              şagirdin
+              ödədiyi məbləğin bu hissəsi müəllimə düşür, qalanı kursa. Güzəşt fənn sətrində "kim qarşılayır" seçiminə
+              görə bölünür.</p>
+          </div>
+        </div>
+        <button type="submit" class="w-full btn-blue py-4 rounded-2xl"><i class="fa-solid fa-check mr-2"></i> Yadda
+          Saxla</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============== TEACHER PROFILE MODAL ============== -->
+  <div id="teacherProfileModal" class="modal-bg" style="z-index:155;" aria-labelledby="tpName">
+    <div class="glass rounded-[28px] w-full max-w-2xl max-h-[92vh] overflow-y-auto shadow-2xl"
+      style="background:var(--surface);border:1px solid var(--border);">
+      <div class="relative p-6 sm:p-8 pb-0">
+        <button onclick="closeModal('teacherProfileModal')"
+          class="absolute top-5 right-5 text-slate-500 hover:text-white text-xl w-9 h-9 flex items-center justify-center rounded-full hover:bg-white/10 z-10">
+          <i class="fa-solid fa-xmark"></i></button>
+        <div class="flex items-start gap-5 mb-5">
+          <div id="tpAvatar"
+            class="w-20 h-20 rounded-3xl bg-gradient-to-br from-blue-500 to-emerald-600 flex items-center justify-center text-3xl font-black text-white shrink-0">
+            M</div>
+          <div class="flex-1 min-w-0 pt-1">
+            <h2 id="tpName" class="text-2xl font-black text-white">Ad Soyad</h2>
+            <div id="tpBadges" class="flex flex-wrap gap-2 mt-2"></div>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pb-5 border-b border-white/5">
+          <div class="text-center p-3 rounded-2xl" style="background:var(--azure-50);border:1px solid var(--azure-100)">
+            <p class="text-[10px] uppercase text-slate-500 font-bold">Filial</p>
+            <p id="tpBranch" class="text-sm font-black text-blue-400 mt-1">-</p>
+          </div>
+          <div class="text-center p-3 rounded-2xl" style="background:var(--teal-50);border:1px solid var(--teal-100)">
+            <p class="text-[10px] uppercase text-slate-500 font-bold">Fənn</p>
+            <p id="tpSubject" class="text-sm font-black text-emerald-400 mt-1">-</p>
+          </div>
+          <div class="text-center p-3 rounded-2xl" style="background:var(--gold-50);border:1px solid var(--gold-100)">
+            <p class="text-[10px] uppercase text-slate-500 font-bold">Şagird</p>
+            <p id="tpStudentCount" class="text-2xl font-black text-amber-400 mt-1">0</p>
+          </div>
+          <div class="text-center p-3 rounded-2xl" style="background:var(--plum-50);border:1px solid var(--plum-100)">
+            <p class="text-[10px] uppercase text-slate-500 font-bold">Maaş</p>
+            <p id="tpSalary" class="text-sm font-black text-purple-400 mt-1">-</p>
+          </div>
+        </div>
+      </div>
+      <div class="p-6 sm:p-8 pt-5">
+        <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">
+          <i class="fa-solid fa-graduation-cap mr-2 text-emerald-400"></i>Bağlı Şagirdlər
+        </p>
+        <div id="tpStudentList" class="space-y-2 mb-5"></div>
+        <div class="flex flex-col sm:flex-row gap-3 pt-5 border-t border-white/5">
+          <button id="tpEditBtn" class="flex-1 btn-blue py-3"><i class="fa-solid fa-pen mr-2"></i>Redaktə Et</button>
+          <button id="tpAiBtn"
+            class="flex-1 py-3 rounded-2xl font-black text-white bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:opacity-90 transition">
+            <i class="fa-solid fa-wand-magic-sparkles mr-2"></i>AI Performans Analizi
+          </button>
+        </div>
+        <div id="tpAiResult" class="hidden mt-4 p-4 rounded-2xl glass-soft border border-purple-500/30"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============== TEACHER HOURS MODAL ============== -->
+  <div id="hoursModal" class="modal-bg" style="z-index:150;" aria-labelledby="hoursModalTitle">
+    <div class="glass rounded-[28px] p-6 sm:p-8 w-full max-w-md shadow-2xl">
+      <div class="flex items-center justify-between mb-6 pb-4 border-b border-white/5">
+        <h3 id="hoursModalTitle" class="text-xl font-black italic uppercase text-white"><i
+            class="fa-solid fa-clock text-amber-400 mr-2"></i>Saatları idarə et</h3>
+        <button onclick="closeModal('hoursModal')"
+          class="text-slate-500 hover:text-white text-xl w-9 h-9 flex items-center justify-center rounded-full hover:bg-white/10"><i
+            class="fa-solid fa-xmark"></i></button>
+      </div>
+      <p id="hoursTeacherName" class="text-sm text-slate-300 mb-4 font-bold"></p>
+      <form id="hoursForm" class="space-y-4">
+        <input type="hidden" id="hTeacherId" />
+        <div class="grid grid-cols-2 gap-3">
+          <input type="month" id="hMonth" class="input-style" required />
+          <input type="number" id="hHours" class="input-style" placeholder="Saat sayı" min="0" step="0.5" required />
+        </div>
+        <button type="submit" class="w-full btn-amber py-4 rounded-2xl"><i class="fa-solid fa-check mr-2"></i>Yadda
+          saxla</button>
+      </form>
+      <div class="mt-5 pt-5 border-t border-white/5">
+        <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Qeyd olunmuş saatlar</p>
+        <div id="hoursList" class="space-y-2 max-h-48 overflow-y-auto"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============== EXPENSE / INCOME MODAL ============== -->
+  <div id="financeModal" class="modal-bg" aria-labelledby="financeModalTitle">
+    <div class="glass rounded-[28px] p-6 sm:p-8 w-full max-w-lg shadow-2xl">
+      <div class="flex items-center justify-between mb-6 pb-4 border-b border-white/5">
+        <h3 id="financeModalTitle" class="text-xl font-black italic uppercase text-white">Yeni Qeyd</h3>
+        <button onclick="closeModal('financeModal')"
+          class="text-slate-500 hover:text-white text-xl w-9 h-9 flex items-center justify-center rounded-full hover:bg-white/10"><i
+            class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form id="financeForm" class="space-y-4">
+        <input type="hidden" id="fId" />
+        <input type="hidden" id="fType" />
+        <input type="text" id="fTitle" class="input-style" placeholder="Başlıq *" required />
+        <div id="fCategoryWrap">
+          <select id="fCategory" class="input-style">
+            <option value="salary">Müəllim Maaşı</option>
+            <option value="rent">İcarə</option>
+            <option value="utility">Kommunal</option>
+            <option value="marketing">Marketinq</option>
+            <option value="other">Digər</option>
+          </select>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <input type="number" id="fAmount" class="input-style" placeholder="Məbləğ (AZN) *" min="0" required />
+          <input type="text" id="fDate" class="input-style" placeholder="Tarix *" required />
+        </div>
+        <select id="fBranch" class="input-style" required>
+          <option value="sheher">Şəhər Filialı</option>
+          <option value="goynuk">Göynük Filialı</option>
+        </select>
+        <input type="text" id="fNote" class="input-style" placeholder="Qeyd" />
+        <button type="submit" class="w-full btn-primary py-4 rounded-2xl"><i class="fa-solid fa-check mr-2"></i> Yadda
+          Saxla</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="confirmModal" class="modal-bg" style="z-index:200;" aria-labelledby="confirmTitle"
+    aria-describedby="confirmText">
+    <div class="overlay-surface rounded-[28px] p-8 max-w-sm w-full shadow-2xl text-center">
+      <div class="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4 text-xl"
+        style="background:var(--red-50);border:1px solid var(--red-100);color:var(--red-700);">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+      </div>
+      <h3 class="font-head text-lg font-bold mb-2" style="color:var(--text-strong);" id="confirmTitle">Əminsiniz?</h3>
+      <p class="text-xs mb-7" style="color:var(--text-muted);" id="confirmText">Bu əməliyyatı geri qaytarmaq mümkün
+        deyil.</p>
+      <div class="flex gap-3">
+        <button onclick="closeModal('confirmModal')" class="flex-1 btn-ghost py-3">Ləğv et</button>
+        <button id="confirmOkBtn" class="flex-1 btn-danger py-3">Təsdiqlə</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================================ -->
+  <!-- ============================== JAVASCRIPT ================================== -->
+  <!-- ============================================================================ -->
+
+  <!-- ============================ APP SCRIPTS ============================ -->
+  <script src="js/config.js"></script>
+  <script src="js/firebase-init.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/permissions.js"></script>
+  <script src="js/rbac.js"></script>
+  <script src="js/utils.js"></script>
+  <!-- Loaded right after utils.js so toast()/$() are already available
+       to catch as many startup errors as possible, before config/auth
+       errors elsewhere in the boot sequence could otherwise vanish
+       silently. See that file's header comment for what this does and
+       doesn't replace. -->
+  <script src="js/error-handler.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/idle-timeout.js"></script>
+  <script src="js/compat.js"></script>
+  <script src="js/ai/knowledge.js"></script>
+  <script src="js/ai/prompts.js"></script>
+  <script src="js/ai/gemini.js"></script>
+  <script src="js/ai/context.js"></script>
+  <script src="views/dashboard.js"></script>
+  <script src="views/students.js"></script>
+  <script src="views/attendance.js"></script>
+  <script src="views/teachers.js"></script>
+  <script src="views/schedule.js"></script>
+  <script src="views/finance.js"></script>
+  <script src="views/info.js"></script>
+  <script src="views/settings.js"></script>
+  <script src="views/users.js"></script>
+  <script src="views/ai/tools.js"></script>
+  <script src="views/ai/chat.js"></script>
+  <script src="js/admin.js"></script>
+  <script src="js/router.js"></script>
+
+  <!-- PWA: registers the service worker (sw.js) after the app's own
+       scripts have loaded. Kept in its own external file for clean
+       separation from the rest of the boot sequence — no CSP
+       requirement drives this anymore (this project's CSP was removed;
+       see git history / prior notes if it's ever reintroduced). -->
+  <script src="js/pwa-register.js"></script>
+</body>
+
+</html>

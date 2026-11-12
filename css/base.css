@@ -1,0 +1,491 @@
+/* ==========================================================================
+   MƏRAM ERP — DESIGN FOUNDATION
+   --------------------------------------------------------------------------
+   Direction: warm editorial admin tool. Cream paper + ink typography in
+   light mode (default), true charcoal in dark mode — NOT another dark
+   glassmorphism SaaS shell. Teal is the operating accent, terracotta is
+   the "attention" accent (replaces the old amber/red-only vocabulary).
+   Flat bordered surfaces instead of blur-everywhere; blur is reserved for
+   overlays (modals, floating panels) where it earns its cost.
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root {
+  color-scheme: light;
+
+  /* ---- Core palette (OKLCH-checked, WCAG-verified pairs) ---- */
+  --ink-950: #0f1e1c;
+  --ink-900: #142522;
+  --ink-800: #1c322e;
+  --ink-700: #2a423c;
+  --ink-600: #3d5951;
+  --ink-500: #5b6b67;
+  --ink-400: #7c8a86;
+  --ink-300: #a6b0ac;
+  --ink-200: #d6dbd7;
+  --ink-100: #e9ece9;
+
+  --paper-0: #fffdf9;
+  --paper-50: #fbf7f0;
+  --paper-100: #f5efe3;
+  --paper-200: #ede4d2;
+
+  --teal-700: #0f766e;   /* text-safe */
+  --teal-600: #0d9488;   /* fills / large / icons */
+  --teal-500: #14b8a6;
+  --teal-400: #2dd4bf;
+  --teal-100: #d3f3ee;
+  --teal-50: #eafaf7;
+
+  --terracotta-700: #9a3412;
+  --terracotta-600: #c2410c;
+  --terracotta-500: #ea580c;
+  --terracotta-100: #fde3d3;
+  --terracotta-50: #fdf1e7;
+
+  --gold-600: #b45309;
+  --gold-500: #d97706;
+  --gold-100: #faecd0;
+  --gold-50: #fdf6e8;
+
+  --azure-700: #1d4ed8;
+  --azure-600: #2563eb;
+  --azure-100: #dbeafe;
+  --azure-50: #eff6ff;
+
+  --plum-700: #6d28d9;
+  --plum-600: #7c3aed;
+  --plum-100: #ece3fd;
+  --plum-50: #f5f0fe;
+
+  --red-700: #b91c1c;
+  --red-600: #dc2626;
+  --red-100: #fde0e0;
+  --red-50: #fef1f1;
+
+  /* ---- Semantic tokens (light mode = default) ---- */
+  --bg: var(--paper-50);
+  --bg-raised: var(--paper-0);
+  --surface: #ffffff;
+  --surface-soft: var(--paper-100);
+  --surface-sunken: var(--paper-200);
+  --border: rgba(15, 30, 28, 0.10);
+  --border-strong: rgba(15, 30, 28, 0.18);
+  --text: var(--ink-900);
+  --text-strong: var(--ink-950);
+  --text-muted: var(--ink-500);
+  --text-faint: var(--ink-400);
+  --accent: var(--teal-600);
+  --accent-text: var(--teal-700);
+  --accent-soft: var(--teal-50);
+  --focus-ring: var(--teal-600);
+  --shadow-color: 15, 30, 28;
+  --shadow-sm: 0 1px 2px rgba(var(--shadow-color), .06), 0 1px 1px rgba(var(--shadow-color), .04);
+  --shadow-md: 0 6px 20px -4px rgba(var(--shadow-color), .12), 0 2px 6px -2px rgba(var(--shadow-color), .06);
+  --shadow-lg: 0 20px 45px -12px rgba(var(--shadow-color), .22), 0 8px 16px -8px rgba(var(--shadow-color), .10);
+
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 26px;
+
+  --font-head: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+  --font-body: 'Inter', ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+/* ---- Dark mode: real charcoal, not blue-black ---- */
+html.dark-mode {
+  color-scheme: dark;
+  --bg: var(--ink-950);
+  --bg-raised: var(--ink-900);
+  --surface: var(--ink-900);
+  --surface-soft: var(--ink-800);
+  --surface-sunken: #0a1513;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.16);
+  --text: var(--paper-100);
+  --text-strong: #ffffff;
+  --text-muted: var(--ink-300);
+  --text-faint: var(--ink-400);
+  --accent: var(--teal-400);
+  --accent-text: var(--teal-400);
+  --accent-soft: rgba(45, 212, 191, 0.12);
+  --focus-ring: var(--teal-400);
+  --shadow-color: 0, 0, 0;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  background-color: var(--bg);
+  color: var(--text);
+}
+
+body {
+  font-family: var(--font-body);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color .25s ease, color .25s ease;
+}
+
+h1, h2, h3, .font-head { font-family: var(--font-head); letter-spacing: -0.01em; }
+
+::selection { background: var(--teal-100); color: var(--ink-950); }
+html.dark-mode ::selection { background: rgba(45, 212, 191, .25); color: #fff; }
+
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ==========================================================================
+   SURFACES
+   ========================================================================== */
+.glass {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+
+.glass-soft {
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+}
+
+/* Overlay surfaces (modals, floating panels) keep a light blur — this is
+   the one place translucency earns its cost: it keeps context visible
+   behind a temporary layer. */
+.overlay-surface {
+  background: color-mix(in oklab, var(--surface) 92%, transparent);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  border: 1px solid var(--border);
+}
+
+/* ==========================================================================
+   INPUTS
+   ========================================================================== */
+.input-style {
+  width: 100%;
+  background: var(--surface);
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border-strong);
+  outline: none;
+  transition: border-color .2s, box-shadow .2s;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--text-strong);
+}
+
+.input-style::placeholder { color: var(--text-faint); font-weight: 400; }
+
+.input-style:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.input-style:hover:not(:disabled):not(:focus) {
+  border-color: var(--ink-300);
+}
+
+html.dark-mode .input-style:hover:not(:disabled):not(:focus) { border-color: var(--ink-500); }
+
+select.input-style {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none' stroke='%235b6b67' stroke-width='2'%3e%3cpath d='M2 4l4 4 4-4'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 36px;
+}
+
+select option { background-color: var(--surface); color: var(--text-strong); }
+
+/* ==========================================================================
+   BUTTONS
+   ========================================================================== */
+.btn-primary, .btn-blue, .btn-danger, .btn-ghost, .btn-amber {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 12px 18px;
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+  font-size: 12.5px;
+  letter-spacing: .01em;
+  cursor: pointer;
+  user-select: none;
+  border: 1.5px solid transparent;
+  transition: background-color .18s, border-color .18s, transform .1s, box-shadow .18s, color .18s;
+  min-height: 44px;
+}
+
+.btn-primary {
+  background: var(--ink-950);
+  color: var(--paper-50);
+  box-shadow: var(--shadow-sm);
+}
+.btn-primary:hover { background: var(--teal-700); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+.btn-primary:active { transform: translateY(0) scale(.98); }
+html.dark-mode .btn-primary { background: var(--teal-500); color: var(--ink-950); }
+html.dark-mode .btn-primary:hover { background: var(--teal-400); }
+
+.btn-blue {
+  background: var(--azure-600);
+  color: #fff;
+  box-shadow: var(--shadow-sm);
+}
+.btn-blue:hover { background: var(--azure-700); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+.btn-blue:active { transform: translateY(0) scale(.98); }
+
+.btn-danger {
+  background: var(--red-600);
+  color: #fff;
+  box-shadow: var(--shadow-sm);
+}
+.btn-danger:hover { background: var(--red-700); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+.btn-danger:active { transform: translateY(0) scale(.98); }
+
+.btn-amber {
+  background: var(--terracotta-600);
+  color: #fff;
+  box-shadow: var(--shadow-sm);
+}
+.btn-amber:hover { background: var(--terracotta-700); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+.btn-amber:active { transform: translateY(0) scale(.98); }
+
+.btn-ghost {
+  background: var(--surface);
+  color: var(--text);
+  padding: 10px 14px;
+  font-size: 11.5px;
+  border-color: var(--border-strong);
+}
+.btn-ghost:hover { background: var(--surface-soft); border-color: var(--ink-300); transform: translateY(-1px); }
+.btn-ghost:active { transform: translateY(0) scale(.98); }
+
+button, .nav-item, .chip, .pill-tab, .tab-btn, .att-radio { cursor: pointer; }
+
+/* ==========================================================================
+   NAV
+   ========================================================================== */
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 11px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  position: relative;
+  transition: background-color .15s, color .15s;
+}
+
+.nav-item:hover { background: var(--surface-soft); color: var(--text-strong); }
+
+.nav-item.active {
+  background: var(--ink-950);
+  color: var(--paper-50);
+}
+html.dark-mode .nav-item.active { background: var(--teal-500); color: var(--ink-950); }
+
+.nav-item i { width: 18px; text-align: center; font-size: 14px; }
+
+/* ==========================================================================
+   STAT CARDS
+   ========================================================================== */
+.stat-card {
+  padding: 20px;
+  border-radius: var(--radius-lg);
+  position: relative;
+  overflow: hidden;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  transition: transform .2s, box-shadow .2s, border-color .2s;
+}
+.stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.stat-card .stat-icon {
+  position: absolute;
+  right: -8px;
+  top: -8px;
+  font-size: 76px;
+  opacity: .06;
+}
+html.dark-mode .stat-card .stat-icon { opacity: .10; }
+
+/* ==========================================================================
+   BADGES
+   ========================================================================== */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .01em;
+  border: 1px solid transparent;
+}
+
+.badge-emerald { background: var(--teal-50); color: var(--teal-700); border-color: var(--teal-100); }
+.badge-blue { background: var(--azure-50); color: var(--azure-700); border-color: var(--azure-100); }
+.badge-red { background: var(--red-50); color: var(--red-700); border-color: var(--red-100); }
+.badge-amber { background: var(--terracotta-50); color: var(--terracotta-700); border-color: var(--terracotta-100); }
+.badge-purple { background: var(--plum-50); color: var(--plum-700); border-color: var(--plum-100); }
+.badge-slate { background: var(--surface-soft); color: var(--text-muted); border-color: var(--border); }
+
+html.dark-mode .badge-emerald { background: rgba(45,212,191,.14); color: var(--teal-400); border-color: rgba(45,212,191,.25); }
+html.dark-mode .badge-blue { background: rgba(96,165,250,.14); color: #93c5fd; border-color: rgba(96,165,250,.25); }
+html.dark-mode .badge-red { background: rgba(248,113,113,.14); color: #fca5a5; border-color: rgba(248,113,113,.25); }
+html.dark-mode .badge-amber { background: rgba(251,146,60,.14); color: #fdba74; border-color: rgba(251,146,60,.25); }
+html.dark-mode .badge-purple { background: rgba(196,181,253,.14); color: #d8b4fe; border-color: rgba(196,181,253,.25); }
+html.dark-mode .badge-slate { background: var(--surface-soft); color: var(--text-muted); border-color: var(--border); }
+
+/* ==========================================================================
+   TABS
+   ========================================================================== */
+.tab-btn {
+  padding: 10px 2px;
+  font-size: 12px;
+  font-weight: 700;
+  border-bottom: 2px solid transparent;
+  color: var(--text-faint);
+  transition: color .2s, border-color .2s;
+}
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active { color: var(--accent-text); border-color: var(--accent); }
+
+.pill-tab {
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--text-muted);
+  border: 1px solid transparent;
+  transition: all .18s;
+}
+.pill-tab:hover { color: var(--text-strong); background: var(--surface); }
+.pill-tab.active { color: #fff; background: var(--ink-950); }
+html.dark-mode .pill-tab.active { background: var(--teal-500); color: var(--ink-950); }
+
+/* ==========================================================================
+   SIDEBAR
+   ========================================================================== */
+#sidebar { transition: transform .3s cubic-bezier(.4,0,.2,1); }
+
+@media (max-width: 1023px) {
+  #sidebar { transform: translateX(-100%); position: fixed; top: 0; left: 0; height: 100%; z-index: 60; }
+  #sidebar.open { transform: translateX(0); }
+}
+
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 30, 28, .45);
+  z-index: 55;
+}
+.sidebar-overlay.active { display: block; animation: fadeIn .2s ease; }
+
+/* ==========================================================================
+   MODAL
+   ========================================================================== */
+.modal-bg {
+  background: rgba(15, 30, 28, .5);
+  backdrop-filter: blur(3px);
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+.modal-bg.active { display: flex; animation: fadeIn .18s ease; }
+.modal-bg.active > div { animation: modalIn .3s cubic-bezier(.4,0,.2,1); }
+
+/* ==========================================================================
+   TOAST
+   ========================================================================== */
+#toastContainer {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: calc(100vw - 2rem);
+}
+
+.toast {
+  position: relative;
+  padding: 13px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  min-width: 260px;
+  box-shadow: var(--shadow-lg);
+  animation: toastIn .25s ease;
+  overflow: hidden;
+  border: 1px solid transparent;
+}
+
+.toast.success { background: var(--ink-950); color: var(--paper-50); border-color: var(--ink-950); }
+.toast.error { background: var(--red-600); color: #fff; }
+.toast.info { background: var(--surface); color: var(--text-strong); border-color: var(--border-strong); }
+
+.toast::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0;
+  height: 2px;
+  background: currentColor;
+  opacity: .35;
+  width: 100%;
+  animation: toastBar 3.2s linear forwards;
+}
+
+/* ==========================================================================
+   KEYFRAMES
+   ========================================================================== */
+@keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
+@keyframes modalIn {
+  from { opacity: 0; transform: translateY(12px) scale(.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes toastIn { from { transform: translateY(16px); opacity: 0 } to { transform: translateY(0); opacity: 1 } }
+@keyframes toastBar { from { width: 100% } to { width: 0 } }
+@keyframes pulseRing {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(220,38,38,.28) }
+  50% { box-shadow: 0 0 0 5px rgba(220,38,38,0) }
+}
+@keyframes slideUp { from { opacity: 0; transform: translateY(8px) } to { opacity: 1; transform: translateY(0) } }
+@keyframes pop { 0% { transform: scale(.94); opacity: 0 } 60% { transform: scale(1.02); opacity: 1 } 100% { transform: scale(1) } }
+@keyframes shimmer { 0% { background-position: -400px 0 } 100% { background-position: 400px 0 } }
+
+.overdue { animation: pulseRing 2.2s infinite; }
+
+/* Dashboard "due today" emphasis — used instead of .overdue's infinite
+   pulse for the dashboard's urgent-payments list (see views/dashboard.js
+   redesign notes). Runs 3 times (~6.6s total) then settles, so it draws
+   the eye once without becoming ambient background motion when several
+   cards share the same treatment at once — an infinite loop on every
+   card was flagged as the actual problem, not pulsing itself. */
+.dashboard-pulse-today { animation: pulseRing 2.2s ease-in-out 3; }
+
+.slide-up { animation: slideUp .3s cubic-bezier(.4,0,.2,1) both; }
+.pop-in { animation: pop .3s cubic-bezier(.4,0,.2,1) both; }
+
+.skeleton {
+  background: linear-gradient(90deg, var(--surface-soft) 0%, var(--surface-sunken) 50%, var(--surface-soft) 100%);
+  background-size: 800px 100%;
+  animation: shimmer 1.3s infinite linear;
+  border-radius: var(--radius-sm);
+}

@@ -1,0 +1,34 @@
+{
+  "database": {
+    "rules": "database.rules.json"
+  },
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default",
+      "runtime": "nodejs20",
+      "predeploy": [
+        "npm --prefix \"$RESOURCE_DIR\" install"
+      ]
+    }
+  ],
+  "hosting": {
+    "public": ".",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**",
+      "README.md",
+      "js/config.example.js",
+      "functions/**",
+      "functions-README.md",
+      "scripts/**",
+      "tests/**",
+      "package.json",
+      "package-lock.json",
+      "eslint.config.mjs",
+      "eslint.app-globals.mjs",
+      "SECURITY_RULES_README.md"
+    ]
+  }
+}

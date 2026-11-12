@@ -1,0 +1,21 @@
+{
+  "name": "meram-erp",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Məram Tədris Mərkəzi ERP — static frontend. This package.json exists only for dev tooling (tests, lint) — the app itself ships with zero build step, per README.",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint .",
+    "sri:update": "node scripts/add-sri-hashes.mjs",
+    "sri:check": "node scripts/add-sri-hashes.mjs --check",
+    "sw:build": "node scripts/build-sw-precache.mjs",
+    "predeploy": "npm run sw:build && npm run sri:check && npm run lint && npm test"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "eslint": "^9.13.0",
+    "vitest": "^2.1.4"
+  }
+}

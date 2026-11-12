@@ -1,0 +1,197 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "users": {
+      ".read": "auth != null && (root.child('users').child(auth.uid).child('active').val() === true || !data.exists())",
+      "$uid": {
+        ".read": "auth != null && ($uid === auth.uid || root.child('users').child(auth.uid).child('active').val() === true)",
+        ".write": "auth != null && ( $uid === auth.uid || (root.child('users').child(auth.uid).child('active').val() === true && (auth.token.role === 'admin' || auth.token.role === 'super_admin')) )",
+        ".validate": "!data.exists() ? newData.hasChildren(['email','role','branch','active']) : newData.hasChildren(['email'])",
+        "email": {
+          ".validate": "$uid === auth.uid ? newData.val() === data.val() : newData.isString()"
+        },
+        "name": {
+          ".validate": "newData.isString() && newData.val().length <= 200"
+        },
+        "role": {
+          ".write": "auth != null && root.child('users').child(auth.uid).child('active').val() === true && (auth.token.role === 'admin' || auth.token.role === 'super_admin')",
+          ".validate": "newData.isString() && (!data.exists() ? newData.val().matches(/^(super_admin|admin|manager|reception|teacher|accountant|hr)$/) : true)"
+        },
+        "branch": {
+          ".write": "auth != null && root.child('users').child(auth.uid).child('active').val() === true && (auth.token.role === 'admin' || auth.token.role === 'super_admin')",
+          ".validate": "newData.isString()"
+        },
+        "active": {
+          ".write": "auth != null && root.child('users').child(auth.uid).child('active').val() === true && (auth.token.role === 'admin' || auth.token.role === 'super_admin')",
+          ".validate": "newData.isBoolean()"
+        },
+        "deletedAt": {
+          ".validate": "newData.isNumber()"
+        },
+        "deletedBy": {
+          ".validate": "newData.isString()"
+        },
+        "createdAt": {
+          ".validate": "newData.isNumber()"
+        },
+        "createdBy": {
+          ".validate": "newData.isString()"
+        },
+        "lastLogin": {
+          ".write": "auth != null && $uid === auth.uid",
+          ".validate": "newData.isNumber()"
+        },
+        "prefs": {
+          ".write": "auth != null && $uid === auth.uid",
+          ".validate": "newData.hasChildren()"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+    "students": {
+      ".read": "auth != null && root.child('users').child(auth.uid).child('active').val() === true",
+      ".indexOn": ["branch"],
+      "$sid": {
+        ".write": "auth != null && root.child('users').child(auth.uid).child('active').val() === true && ( auth.token.role === 'admin' || auth.token.role === 'super_admin' || ( auth.token.branch === (newData.exists() ? newData.child('branch').val() : data.child('branch').val()) && ( auth.token.role === 'manager' || ( auth.token.role === 'reception' && !(data.exists() && !newData.exists()) ) ) ) )",
+        ".validate": "newData.hasChildren(['name','surname','branch'])",
+        "branch": {
+          ".validate": "newData.isString() && (newData.val() === 'sheher' || newData.val() === 'goynuk')"
+        },
+        "name": {
+          ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 100"
+        },
+        "surname": {
+          ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 100"
+        },
+        "class": {
+          ".validate": "newData.isString() && newData.val().matches(/^(1|2|3|4|5|6|7|8|9|10|11|abituriyent|universitet|texnikum|pese|boyuk)$/)"
+        },
+        "enrollmentType": {
+          ".validate": "!newData.exists() || newData.isString() && (newData.val() === 'regular' || newData.val() === 'summer')"
+        },
+        "phone1": {
+          ".validate": "!newData.exists() || newData.isString() && newData.val().length <= 25"
+        },
+        "phone2": {
+          ".validate": "!newData.exists() || newData.isString() && newData.val().length <= 25"
+        },
+        "school": {
+          ".validate": "!newData.exists() || newData.isString() && newData.val().length <= 200"
+        },
+        "note": {
+          ".validate": "!newData.exists() || newData.isString() && newData.val().length <= 500"
+        },
+        "createdAt": {
+          ".validate": "!newData.exists() || newData.isNumber()"
+        },
+        "updatedAt": {
+          ".validate": "!newData.exists() || newData.isNumber()"
+        },
+        "parent": {
+          ".validate": "!newData.exists() || newData.isString() && newData.val().length <= 200"
+        }
+      }
+    },
+    "teachers": {
+      ".read": "auth != null && root.child('users').child(auth.uid).child('active').val() === true",
+      ".indexOn": ["branch"],
+      "$tid": {
+        ".write": "auth != null && root.child('users').child(auth.uid).child('active').val() === true && ( auth.token.role === 'admin' || auth.token.role === 'super_admin' || ( auth.token.role === 'hr' && auth.token.branch === (newData.exists() ? newData.child('branch').val() : data.child('branch').val()) && !(data.exists() && !newData.exists()) ) || ( auth.token.role === 'manager' && auth.token.branch === (newData.exists() ? newData.child('branch').val() : data.child('branch').val()) ) )",
+        ".validate": "newData.hasChildren(['name','branch'])",
+        "name": {
+          ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 150"
+        },
+        "branch": {
+          ".validate": "newData.isString() && (newData.val() === 'sheher' || newData.val() === 'goynuk')"
+        },
+        "hourlyRate": {
+          ".validate": "!newData.exists() || newData.isNumber() && newData.val() >= 0 && newData.val() <= 10000"
+        },
+        "monthlySalary": {
+          ".validate": "!newData.exists() || newData.isNumber() && newData.val() >= 0 && newData.val() <= 100000"
+        },
+        "fixedSalary": {
+          ".validate": "!newData.exists() || newData.isNumber() && newData.val() >= 0 && newData.val() <= 100000"
+        },
+        "teacherSharePct": {
+          ".validate": "!newData.exists() || newData.isNumber() && newData.val() >= 0 && newData.val() <= 100"
+        }
+      }
+    },
+    "finance": {
+      "$type": {
+        ".read": "auth != null && root.child('users').child(auth.uid).child('active').val() === true && (auth.token.role === 'admin' || auth.token.role === 'super_admin' || auth.token.role === 'manager' || auth.token.role === 'accountant')",
+        ".indexOn": ["branch"],
+        "$fid": {
+          ".write": "auth != null && root.child('users').child(auth.uid).child('active').val() === true && ( auth.token.role === 'admin' || auth.token.role === 'super_admin' || ( (auth.token.role === 'manager' || auth.token.role === 'accountant') && auth.token.branch === (newData.exists() ? newData.child('branch').val() : data.child('branch').val()) ) )",
+          ".validate": "newData.hasChildren(['title','amount','date','branch']) && newData.child('amount').isNumber() && newData.child('amount').val() >= 0 && newData.child('amount').val() <= 9999999",
+          "title": {
+            ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 200"
+          },
+          "branch": {
+            ".validate": "newData.isString() && (newData.val() === 'sheher' || newData.val() === 'goynuk')"
+          },
+          "category": {
+            ".validate": "!newData.exists() || newData.isString() && newData.val().matches(/^(salary|rent|utility|marketing|other)$/)"
+          }
+        }
+      }
+    },
+    "attendance": {
+      "$date": {
+        "$branch": {
+          ".read": "auth != null && root.child('users').child(auth.uid).child('active').val() === true && (auth.token.role === 'admin' || auth.token.role === 'super_admin' || auth.token.branch === $branch)",
+          "$subject": {
+            "$sid": {
+              ".write": "auth != null && root.child('users').child(auth.uid).child('active').val() === true && (auth.token.role === 'admin' || auth.token.role === 'super_admin' || (auth.token.branch === $branch && (auth.token.role === 'manager' || auth.token.role === 'reception' || auth.token.role === 'teacher')))",
+              ".validate": "newData.isString() && newData.val().matches(/^(present|absent|excused)$/)"
+            }
+          }
+        }
+      }
+    },
+    "schedule": {
+      ".read": "auth != null && root.child('users').child(auth.uid).child('active').val() === true",
+      "$eid": {
+        ".write": "auth != null && root.child('users').child(auth.uid).child('active').val() === true && ( auth.token.role === 'admin' || auth.token.role === 'super_admin' || ( auth.token.role === 'manager' && auth.token.branch === (newData.exists() ? newData.child('branch').val() : data.child('branch').val()) ) )",
+        ".validate": "newData.hasChildren(['teacherId','day','start','end','branch'])"
+      }
+    },
+    "examResults": {
+      ".read": "auth != null && root.child('users').child(auth.uid).child('active').val() === true",
+      "$sid": {
+        "$rid": {
+          ".write": "auth != null && root.child('users').child(auth.uid).child('active').val() === true && ( auth.token.role === 'admin' || auth.token.role === 'super_admin' || ( auth.token.branch === root.child('students').child($sid).child('branch').val() && ( (auth.token.role === 'manager' || auth.token.role === 'reception' || auth.token.role === 'teacher') && !(data.exists() && !newData.exists()) ) ) )"
+        }
+      }
+    },
+    "aiQuota": {
+      "config": {
+        ".read": "auth != null && root.child('users').child(auth.uid).child('active').val() === true",
+        "dailyTotal": {
+          ".write": "auth != null && root.child('users').child(auth.uid).child('active').val() === true && (auth.token.role === 'admin' || auth.token.role === 'super_admin')",
+          ".validate": "newData.isNumber() && newData.val() > 0 && newData.val() <= 100000"
+        }
+      },
+      "usage": {
+        "$dateKey": {
+          "$branch": {
+            ".read": "auth != null && root.child('users').child(auth.uid).child('active').val() === true",
+            ".write": "auth != null && root.child('users').child(auth.uid).child('active').val() === true && (auth.token.role === 'admin' || auth.token.role === 'super_admin' || auth.token.branch === $branch)",
+            ".validate": "newData.isNumber() && newData.val() >= 0"
+          }
+        }
+      }
+    },
+    "audit": {
+      ".read": "auth != null && root.child('users').child(auth.uid).child('active').val() === true && (auth.token.role === 'admin' || auth.token.role === 'super_admin' || auth.token.role === 'manager')",
+      "$eid": {
+        ".write": "auth != null && root.child('users').child(auth.uid).child('active').val() === true && !data.exists() && newData.exists()",
+        ".validate": "newData.hasChildren(['action','entity','userId','ts']) && newData.child('userId').val() === auth.uid"
+      }
+    }
+  }
+}

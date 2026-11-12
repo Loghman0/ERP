@@ -1,0 +1,33 @@
+{
+  "name": "Məram Tədris Mərkəzi",
+  "short_name": "Məram",
+  "description": "Məram Tədris Mərkəzi üçün idarəetmə sistemi — şagirdlər, kadrlar, davamiyyət, maliyyə və AI hesabatlar.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#fbf7f0",
+  "theme_color": "#0f766e",
+  "lang": "az",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
